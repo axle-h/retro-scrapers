@@ -45,5 +45,6 @@ class ScraperBase(metaclass=ABCMeta):
                 buffer = response.read()
                 f.write(buffer)
                 f.close()
+                return
             except:
                 print("Retrying")
