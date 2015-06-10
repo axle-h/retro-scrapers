@@ -1,10 +1,4 @@
-from enum import Enum
-
 __author__ = 'Alex Haslehurst'
-
-
-class RetroDataSource(Enum):
-    TheGamesDb = 1
 
 
 class RetroImage:

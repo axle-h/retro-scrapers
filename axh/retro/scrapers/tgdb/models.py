@@ -1,9 +1,7 @@
-from enum import IntEnum
-
 __author__ = 'Alex Haslehurst'
 
 
-class RetroPlatform(IntEnum):
+class RetroPlatform():
     Amiga = 4911
     Arcade = 23
     Atari2600 = 22

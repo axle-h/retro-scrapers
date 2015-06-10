@@ -1,4 +1,4 @@
-from axh.retro.scrapers.models import RetroDataSource, Rom, RetroImage
+from axh.retro.scrapers.models import Rom, RetroImage
 from axh.retro.scrapers.scraper import ScraperBase
 from axh.retro.scrapers.tgdb import TgDbRequest
 from xml.etree import ElementTree
@@ -13,7 +13,7 @@ class _TgDbGetPlatformRequest(TgDbRequest):
     GetPlatformUrl = "/api/GetPlatform.php"
 
     def __init__(self, platform_id):
-        super().__init__(self.GetPlatformUrl, {"id": platform_id.value})
+        super().__init__(self.GetPlatformUrl, {"id": platform_id})
         self.platform_id = platform_id
 
 
@@ -35,7 +35,7 @@ class _TgDbGetImageRequest(TgDbRequest):
 
 class TgDbApiClient(ScraperBase):
     def __init__(self, system):
-        super().__init__(RetroDataSource.TheGamesDb)
+        super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
                      [self._try_scrape(file_name) for file_name in os.listdir(system.path) if
