@@ -38,7 +38,8 @@ class TgDbApiClient(ScraperBase):
         super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
-                     [self._try_scrape(file_name) for file_name in os.listdir(system.path) if
+                     [self._try_scrape(file_name) or self._try_scrape_alternative_name(file_name, system.path)
+                      for file_name in os.listdir(system.path) if
                       any(file_name.endswith(ext) for ext in system.extensions)] if rom is not None]
 
     def save_images(self, path):
@@ -51,11 +52,24 @@ class TgDbApiClient(ScraperBase):
                                                 os.path.splitext(rom.boxart_back.url)[1])
                 ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_back.url), rom.image)
 
-
             if rom.boxart_front is not None:
                 rom.image = os.path.join(path, os.path.splitext(rom.file_name)[0] + "-back" +
                                                 os.path.splitext(rom.boxart_back.url)[1])
                 ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_front.url), rom.image)
+
+    def _try_scrape_alternative_name(self, file_name, path):
+        while True:
+            alternative_name = input("Try a new name for %s (or press Enter to skip): " % file_name)
+            if alternative_name is None or alternative_name == "":
+                rom_file = os.path.join(path, file_name)
+                if input("Delete %s? (y/n) " % rom_file).strip().lower() == "y":
+                    os.remove(rom_file)
+                    print("Deleted")
+                return None
+
+            rom = self._try_scrape(alternative_name)
+            if rom is not None and input("Ok? (y/n) ").strip().lower() == "y":
+                return rom
 
     def _try_scrape(self, file_name):
         print("[%s]" % file_name, end=" ")
@@ -70,7 +84,7 @@ class TgDbApiClient(ScraperBase):
 
         exact_rom = self._try_get_exact_game(rom_name, file_name)
         if exact_rom is not None:
-            print("exact: " + rom_name)
+            print("exact: " + exact_rom.title)
             return exact_rom
 
         roms = self._get_games(rom_name, file_name)
@@ -79,14 +93,14 @@ class TgDbApiClient(ScraperBase):
             return None
 
         if len(roms) == 1:
-            print("single: " + rom_name)
+            print("single: " + roms[0].title)
             return roms[0]
 
         alpha_numeric_pattern = re.compile('[\W_]+')
         key = alpha_numeric_pattern.sub('', rom_name).lower()
         for rom in roms:
             if key == alpha_numeric_pattern.sub('', rom.title).lower():
-                print("auto: " + rom_name)
+                print("auto: " + rom.title)
                 return rom
 
         print("")
