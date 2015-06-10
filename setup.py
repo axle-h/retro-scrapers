@@ -11,7 +11,5 @@ setup(
     license='',
     author='Alex Haslehurst',
     author_email='alex.haslehurst@gmail.com',
-    description='Collection of retro gaming meta data scrapers',
-    requires=[''],
-    install_requires=['']
+    description='Collection of retro gaming meta data scrapers'
 )
