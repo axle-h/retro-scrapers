@@ -28,10 +28,9 @@ class ScraperBase(metaclass=ABCMeta):
                     return gzip.decompress(buf).decode()
                 else:
                     return buf.decode()
-            except ConnectionResetError:
-                print("Connection reset")
+            except urllib.error.HTTPError:
+                print("Retrying in 10s")
                 time.sleep(10)
-                print("Retrying")
 
     @staticmethod
     def _save_file(request, file_name):
