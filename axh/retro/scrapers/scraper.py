@@ -30,16 +30,20 @@ class ScraperBase(metaclass=ABCMeta):
                     return gzip.decompress(buf).decode()
                 else:
                     return buf.decode()
-            except (urllib.error.HTTPError, http.client.IncompleteRead):
-                print("\nRetrying")
+            except:
+                print("Retrying")
 
     @staticmethod
     def _save_file(request, file_name):
-        response = urllib.request.urlopen(request)
-        f = open(file_name, 'wb')
-        meta = dict(response.info())
-        file_size = int(meta.get("Content-Length"))
-        print("Downloading: %s Bytes: %s" % (file_name, file_size))
-        buffer = response.read()
-        f.write(buffer)
-        f.close()
+        while True:
+            try:
+                response = urllib.request.urlopen(request)
+                f = open(file_name, 'wb')
+                meta = dict(response.info())
+                file_size = int(meta.get("Content-Length"))
+                print("Downloading: %s Bytes: %s" % (file_name, file_size))
+                buffer = response.read()
+                f.write(buffer)
+                f.close()
+            except:
+                print("Retrying")
