@@ -1,3 +1,5 @@
+import http
+
 __author__ = 'Alex Haslehurst'
 
 from abc import ABCMeta, abstractmethod
@@ -28,9 +30,8 @@ class ScraperBase(metaclass=ABCMeta):
                     return gzip.decompress(buf).decode()
                 else:
                     return buf.decode()
-            except urllib.error.HTTPError:
-                print("Retrying in 10s")
-                time.sleep(10)
+            except (urllib.error.HTTPError, http.client.IncompleteRead):
+                print("\nRetrying")
 
     @staticmethod
     def _save_file(request, file_name):
