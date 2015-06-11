@@ -38,29 +38,12 @@ class TgDbApiClient(ScraperBase):
         super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
-                     [self.save_image(
-                         self._try_scrape(file_name) or self._try_scrape_alternative_name(file_name, system.path),
-                         images_path)
+                     [self._save_image(self._try_scrape(file_name.split("(")[0].strip(), file_name)
+                                       or self._try_scrape_alternative_name(file_name, system.path),
+                                       images_path)
                       for file_name in os.listdir(system.path) if
                       any(file_name.endswith(ext) for ext in system.extensions) and not any(
                           file_name == ignore_file for ignore_file in ignore_list)] if rom is not None]
-
-    def save_image(self, rom, path):
-        if rom is None:
-            return
-        base_name = os.path.join(path, os.path.splitext(rom.file_name)[0])
-        back_image = self._download_image(rom.boxart_back, base_name)
-        front_image = self._download_image(rom.boxart_front, base_name)
-        rom.image = front_image or back_image
-
-    @staticmethod
-    def _download_image(image, base_name):
-        if image is None or image.url is None:
-            return None
-
-        image_file = base_name + "-" + image.description + os.path.splitext(image.url)[1]
-        ScraperBase._save_file(_TgDbGetImageRequest(image.url), image_file)
-        return image_file
 
     def _try_scrape_alternative_name(self, file_name, path):
         while True:
@@ -72,20 +55,16 @@ class TgDbApiClient(ScraperBase):
                     print("Deleted")
                 return None
 
-            rom = self._try_scrape(alternative_name)
+            rom = self._try_scrape(alternative_name, file_name)
             if rom is not None and input("Ok? (Y/n) ").strip().lower() != "n":
                 return rom
 
-    def _try_scrape(self, file_name):
+    def _try_scrape(self, rom_name, file_name):
         print("[%s]" % file_name, end=" ")
 
-        rom_name = file_name.split("(")[0].strip()
         the_index = rom_name.find(", The")
         if the_index > 0:
             rom_name = "The " + rom_name[:the_index] + rom_name[the_index + 5:]
-
-        if rom_name.endswith(", The"):
-            rom_name = "The " + rom_name[0:-5]
 
         exact_rom = self._try_get_exact_game(rom_name, file_name)
         if exact_rom is not None:
@@ -144,6 +123,27 @@ class TgDbApiClient(ScraperBase):
         game_data = ElementTree.fromstring(response)
 
         return [self._get_rom(self.source, file_name, game) for game in game_data.findall("Game")]
+
+    @staticmethod
+    def _save_image(rom, path):
+        if rom is None:
+            return None
+
+        base_name = os.path.join(path, os.path.splitext(rom.file_name)[0])
+        back_image = TgDbApiClient._download_image(rom.boxart_back, base_name)
+        front_image = TgDbApiClient._download_image(rom.boxart_front, base_name)
+        rom.image = front_image or back_image
+        return rom
+
+    @staticmethod
+    def _download_image(image, base_name):
+        if image is None or image.url is None:
+            return None
+
+        image_file = base_name + "-" + image.description + os.path.splitext(image.url)[1]
+        ScraperBase._save_file(_TgDbGetImageRequest(image.url), image_file)
+
+        return image_file
 
     @staticmethod
     def _get_rom(source, file_name, game):
