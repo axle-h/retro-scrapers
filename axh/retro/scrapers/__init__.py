@@ -49,14 +49,21 @@ def scrape_es(path):
         os.makedirs(gamelists_path)
 
     for system in systems:
-        scraper = TgDbApiClient(system)
-        scraper.save_images(os.path.join(images_path, system.platform_name))
-
         system_gamelists_path = os.path.join(gamelists_path, system.platform_name)
         if not os.path.exists(system_gamelists_path):
             os.makedirs(system_gamelists_path)
+        gamelists_xml_path = os.path.join(system_gamelists_path, "gameslist.xml")
 
-        game_list_root = ElementTree.Element("gameList")
+        if os.path.isfile(gamelists_xml_path):
+            game_list_root = ElementTree.parse(gamelists_xml_path).getroot()
+            ignore_list = [os.path.basename(game.find("path").text) for game in game_list_root.findall("game")]
+        else:
+            game_list_root = ElementTree.Element("gameList")
+            ignore_list = []
+
+        scraper = TgDbApiClient(system, ignore_list)
+        scraper.save_images(os.path.join(images_path, system.platform_name))
+
         for rom in scraper:
             try:
                 release_date = datetime.datetime.strptime(rom.release_date, "%m/%d/%Y")
@@ -64,12 +71,14 @@ def scrape_es(path):
                 release_date = datetime.datetime.strptime(rom.release_date, "%Y")
 
             game = dict_to_elem({"name": rom.title, "desc": rom.description, "image": rom.image, "rating": rom.rating,
-                 "releasedate": release_date.strftime("%Y%m%dT000000"), "developer": rom.developer, "publisher": rom.publisher,
-                 "genre": rom.genre, "players": rom.players})
+                                 "releasedate": release_date.strftime("%Y%m%dT000000"), "developer": rom.developer,
+                                 "publisher": rom.publisher, "genre": rom.genre, "players": rom.players,
+                                 "path": os.path.join(system.path, rom.file_name)})
             game_list_root.append(game)
 
-        with open(os.path.join(system_gamelists_path, "gameslist.xml"), 'w', encoding='utf-8') as file:
+        with open(gamelists_xml_path, 'w', encoding='utf-8') as file:
             ElementTree.ElementTree(game_list_root).write(file, encoding='unicode')
+
 
 def dict_to_elem(dictionary):
     item = ElementTree.Element("game")

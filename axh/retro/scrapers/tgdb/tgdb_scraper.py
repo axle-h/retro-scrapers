@@ -34,13 +34,14 @@ class _TgDbGetImageRequest(TgDbRequest):
 
 
 class TgDbApiClient(ScraperBase):
-    def __init__(self, system):
+    def __init__(self, system, ignore_list):
         super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
                      [self._try_scrape(file_name) or self._try_scrape_alternative_name(file_name, system.path)
                       for file_name in os.listdir(system.path) if
-                      any(file_name.endswith(ext) for ext in system.extensions)] if rom is not None]
+                      any(file_name.endswith(ext) for ext in system.extensions) and not any(
+                          file_name == ignore_file for ignore_file in ignore_list)] if rom is not None]
 
     def save_images(self, path):
         if not os.path.exists(path):
@@ -49,12 +50,12 @@ class TgDbApiClient(ScraperBase):
         for rom in self.roms:
             if rom.boxart_back is not None:
                 rom.image = os.path.join(path, os.path.splitext(rom.file_name)[0] + "-back" +
-                                                os.path.splitext(rom.boxart_back.url)[1])
+                                         os.path.splitext(rom.boxart_back.url)[1])
                 ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_back.url), rom.image)
 
             if rom.boxart_front is not None:
                 rom.image = os.path.join(path, os.path.splitext(rom.file_name)[0] + "-back" +
-                                                os.path.splitext(rom.boxart_back.url)[1])
+                                         os.path.splitext(rom.boxart_back.url)[1])
                 ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_front.url), rom.image)
 
     def _try_scrape_alternative_name(self, file_name, path):
@@ -62,13 +63,13 @@ class TgDbApiClient(ScraperBase):
             alternative_name = input("Try a new name for %s (or press Enter to skip): " % file_name)
             if alternative_name is None or alternative_name == "":
                 rom_file = os.path.join(path, file_name)
-                if input("Delete %s? (y/n) " % rom_file).strip().lower() == "y":
+                if input("Delete %s? (Y/n) " % rom_file).strip().lower() != "n":
                     os.remove(rom_file)
                     print("Deleted")
                 return None
 
             rom = self._try_scrape(alternative_name)
-            if rom is not None and input("Ok? (y/n) ").strip().lower() == "y":
+            if rom is not None and input("Ok? (Y/n) ").strip().lower() != "n":
                 return rom
 
     def _try_scrape(self, file_name):
@@ -92,16 +93,15 @@ class TgDbApiClient(ScraperBase):
             print("failed")
             return None
 
-        if len(roms) == 1:
-            print("single: " + roms[0].title)
-            return roms[0]
-
         alpha_numeric_pattern = re.compile('[\W_]+')
         key = alpha_numeric_pattern.sub('', rom_name).lower()
         for rom in roms:
             if key == alpha_numeric_pattern.sub('', rom.title).lower():
                 print("auto: " + rom.title)
                 return rom
+
+        if len(roms) == 1 and input("single: %s, Ok? (Y/n) " % roms[0].title).strip().lower() != "n":
+            return roms[0]
 
         print("")
         for i, rom in enumerate(roms):
