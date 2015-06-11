@@ -61,8 +61,10 @@ def scrape_es(path):
             game_list_root = ElementTree.Element("gameList")
             ignore_list = []
 
-        scraper = TgDbApiClient(system, ignore_list)
-        scraper.save_images(os.path.join(images_path, system.platform_name))
+        system_images_path = os.path.join(images_path, system.platform_name)
+        if not os.path.exists(system_images_path):
+            os.makedirs(system_images_path)
+        scraper = TgDbApiClient(system, ignore_list, system_images_path)
 
         for rom in scraper:
             try:

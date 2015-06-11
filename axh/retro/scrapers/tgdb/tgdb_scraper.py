@@ -34,29 +34,33 @@ class _TgDbGetImageRequest(TgDbRequest):
 
 
 class TgDbApiClient(ScraperBase):
-    def __init__(self, system, ignore_list):
+    def __init__(self, system, ignore_list, images_path):
         super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
-                     [self._try_scrape(file_name) or self._try_scrape_alternative_name(file_name, system.path)
+                     [self.save_image(
+                         self._try_scrape(file_name) or self._try_scrape_alternative_name(file_name, system.path),
+                         images_path)
                       for file_name in os.listdir(system.path) if
                       any(file_name.endswith(ext) for ext in system.extensions) and not any(
                           file_name == ignore_file for ignore_file in ignore_list)] if rom is not None]
 
-    def save_images(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path)
+    def save_image(self, rom, path):
+        if rom is None:
+            return
+        base_name = os.path.join(path, os.path.splitext(rom.file_name)[0])
+        back_image = self._download_image(rom.boxart_back, base_name)
+        front_image = self._download_image(rom.boxart_front, base_name)
+        rom.image = front_image or back_image
 
-        for rom in self.roms:
-            if rom.boxart_back is not None:
-                rom.image = os.path.join(path, os.path.splitext(rom.file_name)[0] + "-back" +
-                                         os.path.splitext(rom.boxart_back.url)[1])
-                ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_back.url), rom.image)
+    @staticmethod
+    def _download_image(image, base_name):
+        if image is None or image.url is None:
+            return None
 
-            if rom.boxart_front is not None:
-                rom.image = os.path.join(path, os.path.splitext(rom.file_name)[0] + "-back" +
-                                         os.path.splitext(rom.boxart_back.url)[1])
-                ScraperBase._save_file(_TgDbGetImageRequest(rom.boxart_front.url), rom.image)
+        image_file = base_name + "-" + image.description + os.path.splitext(image.url)[1]
+        ScraperBase._save_file(_TgDbGetImageRequest(image.url), image_file)
+        return image_file
 
     def _try_scrape_alternative_name(self, file_name, path):
         while True:
@@ -100,8 +104,11 @@ class TgDbApiClient(ScraperBase):
                 print("auto: " + rom.title)
                 return rom
 
-        if len(roms) == 1 and input("single: %s, Ok? (Y/n) " % roms[0].title).strip().lower() != "n":
-            return roms[0]
+        if len(roms) == 1:
+            if input("single: %s, Ok? (Y/n) " % roms[0].title).strip().lower() != "n":
+                return roms[0]
+            else:
+                return None
 
         print("")
         for i, rom in enumerate(roms):
@@ -156,7 +163,7 @@ class TgDbApiClient(ScraperBase):
     def _get_boxart(element, side):
         node = element.find("Images/boxart[@side='%s']" % side)
         banners_url = "/banners"
-        return None if node is None else RetroImage("Boxart[%s]" % side, urllib.parse.urljoin(banners_url, node.text),
+        return None if node is None else RetroImage("boxart-%s" % side, urllib.parse.urljoin(banners_url, node.text),
                                                     node.attrib["width"], node.attrib["height"],
                                                     urllib.parse.urljoin(banners_url, node.attrib["thumb"]))
 
