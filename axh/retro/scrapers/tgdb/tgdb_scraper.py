@@ -130,9 +130,8 @@ class TgDbApiClient(ScraperBase):
             return None
 
         base_name = os.path.join(path, os.path.splitext(rom.file_name)[0])
-        back_image = TgDbApiClient._download_image(rom.boxart_back, base_name)
-        front_image = TgDbApiClient._download_image(rom.boxart_front, base_name)
-        rom.image = front_image or back_image
+        image = rom.boxart_front or rom.boxart_back
+        rom.image = TgDbApiClient._download_image(image, base_name)
         return rom
 
     @staticmethod

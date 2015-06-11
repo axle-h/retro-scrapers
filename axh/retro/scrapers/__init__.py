@@ -68,12 +68,15 @@ def scrape_es(path):
 
         for rom in scraper:
             try:
-                release_date = datetime.datetime.strptime(rom.release_date, "%m/%d/%Y")
+                release_date = datetime.datetime.strptime(rom.release_date, "%m/%d/%Y").strftime("%Y%m%dT000000")
             except ValueError:
-                release_date = datetime.datetime.strptime(rom.release_date, "%Y")
+                try:
+                    release_date = datetime.datetime.strptime(rom.release_date, "%m/%d/%Y").strftime("%Y%m%dT000000")
+                except ValueError:
+                    release_date = ""
 
             game = dict_to_elem({"name": rom.title, "desc": rom.description, "image": rom.image, "rating": rom.rating,
-                                 "releasedate": release_date.strftime("%Y%m%dT000000"), "developer": rom.developer,
+                                 "releasedate": release_date, "developer": rom.developer,
                                  "publisher": rom.publisher, "genre": rom.genre, "players": rom.players,
                                  "path": os.path.join(system.path, rom.file_name)})
             game_list_root.append(game)
