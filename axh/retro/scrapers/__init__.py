@@ -97,10 +97,12 @@ def scrape_es(path):
                 index = int(index)
                 if index == 0:
                     game_list_root.remove(game)
-                    os.remove(game_path)
+                    if os.path.isfile(game_path):
+                        os.remove(game_path)
                 elif index == 1:
                     game_list_root.remove(dup_game)
-                    os.remove(dup_game_path)
+                    if os.path.isfile(dup_game_path):
+                        os.remove(dup_game_path)
             except (ValueError, IndexError):
                 pass
 
