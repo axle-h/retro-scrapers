@@ -35,7 +35,6 @@ _platform_mapping = {
     'snes': RetroPlatform.SuperNintendo,
     'pcengine': RetroPlatform.TurboGrafx16}
 
-
 def scrape_es(path):
     es_systems_cfg = os.path.join(path, "es_systems.cfg")
     images_path = os.path.join(path, "images")
@@ -75,17 +74,48 @@ def scrape_es(path):
                 except ValueError:
                     release_date = ""
 
-            game = dict_to_elem({"name": rom.title, "desc": rom.description, "image": rom.image, "rating": rom.rating,
+            game = _dict_to_elem({"name": rom.title, "desc": rom.description, "image": rom.image, "rating": rom.rating,
                                  "releasedate": release_date, "developer": rom.developer,
                                  "publisher": rom.publisher, "genre": rom.genre, "players": rom.players,
                                  "path": os.path.join(system.path, rom.file_name)})
             game_list_root.append(game)
 
+        game_dict = dict()
+        for game in game_list_root.findall("game"):
+            game_name = game.find("name").text
+            if game_name not in game_dict:
+                game_dict[game_name] = game
+                continue
+            dup_game = game_dict[game_name]
+            dup_game_path = dup_game.find("path").text
+            game_path = game.find("path").text
+            print("[%s] Duplicate" % game_name)
+            print("[0] %s" % dup_game_path)
+            print("[1] %s" % game_path)
+            index = input("Select one to keep (or press Enter to skip): ")
+            try:
+                index = int(index)
+                if index == 0:
+                    game_list_root.remove(game)
+                    os.remove(game_path)
+                elif index == 1:
+                    game_list_root.remove(dup_game)
+                    os.remove(dup_game_path)
+            except (ValueError, IndexError):
+                pass
+
         with open(gamelists_xml_path, 'w', encoding='utf-8') as file:
             ElementTree.ElementTree(game_list_root).write(file, encoding='unicode')
 
 
-def dict_to_elem(dictionary):
+def rm_dups_es(path):
+    es_systems_cfg = os.path.join(path, "es_systems.cfg")
+    images_path = os.path.join(path, "images")
+
+
+
+
+def _dict_to_elem(dictionary):
     item = ElementTree.Element("game")
     for key in dictionary:
         field = ElementTree.Element(key)
