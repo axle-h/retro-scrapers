@@ -51,7 +51,7 @@ def scrape_es(path):
         system_gamelists_path = os.path.join(gamelists_path, system.platform_name)
         if not os.path.exists(system_gamelists_path):
             os.makedirs(system_gamelists_path)
-        gamelists_xml_path = os.path.join(system_gamelists_path, "gameslist.xml")
+        gamelists_xml_path = os.path.join(system_gamelists_path, "gamelist.xml")
 
         if os.path.isfile(gamelists_xml_path):
             game_list_root = ElementTree.parse(gamelists_xml_path).getroot()

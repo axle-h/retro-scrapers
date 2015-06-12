@@ -38,7 +38,7 @@ class TgDbApiClient(ScraperBase):
         super().__init__("TheGamesDb")
         self.platform = TgDbApiClient._get_platform(system.platform)
         self.roms = [rom for rom in
-                     [self._save_image(self._try_scrape(file_name.split("(")[0].strip(), file_name)
+                     [self._save_image(self._try_scrape(os.path.splitext(file_name)[0].split("(")[0].strip(), file_name)
                                        or self._try_scrape_alternative_name(file_name, system.path),
                                        images_path)
                       for file_name in os.listdir(system.path) if
