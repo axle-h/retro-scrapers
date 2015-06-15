@@ -30,4 +30,5 @@ class RetroPlatform():
     SuperNintendo = 6
     TurboGrafx16 = 34
     NeoGeoPocketColor = 4923
+    WonderSwanColor = 4926
 

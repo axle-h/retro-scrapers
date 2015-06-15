@@ -34,7 +34,8 @@ _platform_mapping = {
     'psp': RetroPlatform.SonyPSP,
     'snes': RetroPlatform.SuperNintendo,
     'pcengine': RetroPlatform.TurboGrafx16,
-    'ngpc': RetroPlatform.NeoGeoPocketColor}
+    'ngpc': RetroPlatform.NeoGeoPocketColor,
+    'wonderswancolor': RetroPlatform.WonderSwanColor}
 
 def scrape_es(path):
     es_systems_cfg = os.path.join(path, "es_systems.cfg")
