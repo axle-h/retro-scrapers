@@ -14,6 +14,7 @@ _platform_mapping = {
     'atari7800': RetroPlatform.Atari7800,
     'atarijaguar': RetroPlatform.AtariJaguar,
     'atarijaguarcd': RetroPlatform.AtariJaguarCD,
+    'atarilynx': RetroPlatform.AtariLynx,
     'colecovision': RetroPlatform.Colecovision,
     'c64': RetroPlatform.Commodore64,
     'intellivision': RetroPlatform.Intellivision,

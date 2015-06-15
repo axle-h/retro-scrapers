@@ -9,6 +9,7 @@ class RetroPlatform():
     Atari7800 = 27
     AtariJaguar = 28
     AtariJaguarCD = 29
+    AtariLynx = 4924
     Colecovision = 31
     Commodore64 = 40
     Intellivision = 32
