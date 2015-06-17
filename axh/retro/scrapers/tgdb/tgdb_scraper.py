@@ -91,7 +91,7 @@ class TgDbApiClient(ScraperBase):
 
         print("")
         for i, rom in enumerate(roms):
-            print("[%s] %s" % (i, rom.title))
+            print("[%s] %s (%s)" % (i, rom.title, self.platform))
 
         index = input("Select a result (or press Enter to skip): ")
         try:
