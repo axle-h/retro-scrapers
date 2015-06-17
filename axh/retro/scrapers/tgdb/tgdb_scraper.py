@@ -60,7 +60,7 @@ class TgDbApiClient(ScraperBase):
                 return rom
 
     def _try_scrape(self, rom_name, file_name):
-        print("[%s]" % file_name, end=" ")
+        print("[%s (%s)]" % (file_name, self.platform), end=" ")
 
         the_index = rom_name.find(", The")
         if the_index > 0:
@@ -91,7 +91,7 @@ class TgDbApiClient(ScraperBase):
 
         print("")
         for i, rom in enumerate(roms):
-            print("[%s] %s (%s)" % (i, rom.title, self.platform))
+            print("[%s] %s" % (i, rom.title))
 
         index = input("Select a result (or press Enter to skip): ")
         try:
