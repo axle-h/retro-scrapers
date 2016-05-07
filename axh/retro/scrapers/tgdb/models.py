@@ -1,9 +1,10 @@
 __author__ = 'Alex Haslehurst'
 
 
-class RetroPlatform():
+class RetroPlatform:
     Pc = 1
     Amiga = 4911
+    AmigaCD32 = 4947
     Arcade = 23
     Atari2600 = 22
     Atari5200 = 26

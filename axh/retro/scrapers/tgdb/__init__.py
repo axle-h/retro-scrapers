@@ -1,6 +1,7 @@
-__author__ = 'Alex Haslehurst'
 import urllib.parse
 import urllib.request
+
+__author__ = 'Alex Haslehurst'
 
 
 class TgDbRequest(urllib.request.Request):

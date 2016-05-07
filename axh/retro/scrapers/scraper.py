@@ -1,8 +1,8 @@
-__author__ = 'Alex Haslehurst'
-
 from abc import ABCMeta, abstractmethod
 import gzip
 import urllib
+
+__author__ = 'Alex Haslehurst'
 
 
 class ScraperBase(metaclass=ABCMeta):

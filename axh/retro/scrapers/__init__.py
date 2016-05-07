@@ -9,6 +9,7 @@ __author__ = 'Alex Haslehurst'
 
 _platform_mapping = {
     'amiga': RetroPlatform.Amiga,
+    'cd32': RetroPlatform.AmigaCD32,
     'atari2600': RetroPlatform.Atari2600,
     'atari5200': RetroPlatform.Atari5200,
     'atari7800': RetroPlatform.Atari7800,
@@ -38,6 +39,7 @@ _platform_mapping = {
     'ngpc': RetroPlatform.NeoGeoPocketColor,
     'wonderswancolor': RetroPlatform.WonderSwanColor,
     'pc': RetroPlatform.Pc}
+
 
 def scrape_es(path):
     es_systems_cfg = os.path.join(path, "es_systems.cfg")
@@ -112,13 +114,6 @@ def scrape_es(path):
 
         with open(gamelists_xml_path, 'w', encoding='utf-8') as file:
             ElementTree.ElementTree(game_list_root).write(file, encoding='unicode')
-
-
-def rm_dups_es(path):
-    es_systems_cfg = os.path.join(path, "es_systems.cfg")
-    images_path = os.path.join(path, "images")
-
-
 
 
 def _dict_to_elem(dictionary):
